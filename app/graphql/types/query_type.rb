@@ -5,11 +5,10 @@ Types::QueryType = GraphQL::ObjectType.define do
 
   field :vtfile do
     type Types::VTFileType
-    argument :md5, !types.String
+    argument :hash, !types.String
     description "VirusTotal Files"
     resolve ->(obj, args, ctx) {
-      Uirusu::VTFile.query_report(VTAPI, args['md5'], allinfo: 1)
-      # Uirusu::VTResult.new(args['md5'], Uirusu::VTFile.query_report(VTAPI, args['md5'])).results
+      Uirusu::VTFile.query_report(VTAPI, args['hash'], allinfo: 1)
     }
   end
 
@@ -31,12 +30,12 @@ Types::QueryType = GraphQL::ObjectType.define do
     }
   end
 
-  # field :vtdomain do
-  #   type Types::VTDomainType
-  #   argument :domain, !types.String
-  #   description "VirusTotal domains"
-  #   resolve ->(obj, args, ctx) {
-  #     results = Uirusu::VTDomain.query_report(VTAPI, args['domain'], allinfo: 1)
-  #   }
-  # end
+  field :vtdomain do
+    type Types::VTDomainType
+    argument :domain, !types.String
+    description "VirusTotal domains"
+    resolve ->(obj, args, ctx) {
+      results = Uirusu::VTDomain.query_report(VTAPI, args['domain'])
+    }
+  end
 end
