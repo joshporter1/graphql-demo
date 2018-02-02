@@ -12,6 +12,12 @@ Types::VTFileType = GraphQL::ObjectType.define do
   field :submission_names, types[types.String], hash_key: 'submission_names'
   field :itw_urls, types[types.String], hash_key: 'ITW_urls'
 
+  field :detection_ratio, types.String do
+    resolve ->(obj, args, ctx) {
+      "#{obj['positives']}/#{obj['total']}"
+    }
+  end
+
   field :raw, types.String do
     resolve ->(obj, args, ctx) {
       obj
