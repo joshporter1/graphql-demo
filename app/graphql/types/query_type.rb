@@ -3,11 +3,14 @@ Types::QueryType = GraphQL::ObjectType.define do
   # Add root-level fields here.
   # They will be entry points for queries on your schema.
 
-  # TODO: remove me
-  field :testField, types.String do
+  # VirusTotal Files
+  field :vtfile do
+    type Types::VTFileType
+    argument :md5, !types.String
     description "An example field added by the generator"
     resolve ->(obj, args, ctx) {
-      "Hello World!"
+      Uirusu::VTFile.query_report(VTAPI, args['md5'], allinfo: 1)
+      # Uirusu::VTResult.new(args['md5'], Uirusu::VTFile.query_report(VTAPI, args['md5'])).results
     }
   end
 end
