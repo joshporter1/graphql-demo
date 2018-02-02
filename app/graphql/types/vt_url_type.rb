@@ -2,9 +2,18 @@ Types::VTUrlType = GraphQL::ObjectType.define do
     name "VTUrl"
 
     field :url, types.String, hash_key: 'url'
-    field :domain, types.String, hash_key: 'domain'
     field :first_seen, types.String, hash_key: 'first_seen'
     field :last_seen, types.String, hash_key: 'last_seen'
+    field :categories, types[types.String] do
+      resolve ->(obj, args, ctx) {
+        obj['additional_info']['categories']
+      }
+    end
+    field :resolution, types.String do
+      resolve ->(obj, args, ctx) {
+        obj['additional_info']['resolution']
+      }
+    end
 
     field :detection_ratio, types.String do
       resolve ->(obj, args, ctx) {

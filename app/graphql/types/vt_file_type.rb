@@ -12,9 +12,21 @@ Types::VTFileType = GraphQL::ObjectType.define do
   field :submission_names, types[types.String], hash_key: 'submission_names'
   field :itw_urls, types[types.String], hash_key: 'ITW_urls'
 
+  field :categories, types[types.String] do
+    resolve ->(obj, args, ctx) {
+      obj['additional_info']['categories']
+    }
+  end
+
   field :detection_ratio, types.String do
     resolve ->(obj, args, ctx) {
       "#{obj['positives']}/#{obj['total']}"
+    }
+  end
+
+  field :vturls, types[Types::VTUrlType] do
+    resolve ->(obj, args, ctx) {
+      obj['ITW_urls'].map { |url| Uirusu::VTUrl.query_report(VTAPI, url, allinfo: 1) }
     }
   end
 

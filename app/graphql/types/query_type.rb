@@ -19,7 +19,24 @@ Types::QueryType = GraphQL::ObjectType.define do
     description "VirusTotal URLs"
     resolve ->(obj, args, ctx) {
       results = Uirusu::VTUrl.query_report(VTAPI, args['url'], allinfo: 1)
-      # Uirusu::VTResult.new(args['md5'], Uirusu::VTFile.query_report(VTAPI, args['md5'])).results
     }
   end
+
+  field :vtaddress do
+    type Types::VTAddressType
+    argument :ip, !types.String
+    description "VirusTotal IP Addresses"
+    resolve ->(obj, args, ctx) {
+      results = Uirusu::VTIPAddr.query_report(VTAPI, args['ip'])
+    }
+  end
+
+  # field :vtdomain do
+  #   type Types::VTDomainType
+  #   argument :domain, !types.String
+  #   description "VirusTotal domains"
+  #   resolve ->(obj, args, ctx) {
+  #     results = Uirusu::VTDomain.query_report(VTAPI, args['domain'], allinfo: 1)
+  #   }
+  # end
 end
