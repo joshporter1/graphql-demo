@@ -4,6 +4,7 @@ Types::VTFileType = GraphQL::ObjectType.define do
   field :md5, types.String, hash_key: 'md5'
   field :sha1, types.String, hash_key: 'sha1'
   field :sha256, types.String, hash_key: 'sha256'
+  field :date, types.String, hash_key: 'date'
   field :first_seen, types.String, hash_key: 'first_seen'
   field :last_seen, types.String, hash_key: 'last_seen'
   field :size, types.Int, hash_key: 'size'
@@ -19,20 +20,53 @@ Types::VTFileType = GraphQL::ObjectType.define do
   end
 
   field :detection_ratio, types.String do
+    description "Computed detection ratio"
     resolve ->(obj, args, ctx) {
       "#{obj['positives']}/#{obj['total']}"
     }
   end
 
-  field :vturls, types[Types::VTUrlType] do
+  field :domains, types[Types::VTDomainType] do
+    argument :pivot, types.Boolean, default_value: false
+    description "Pivoted domains parsed from URLs"
     resolve ->(obj, args, ctx) {
-      obj['ITW_urls'].map { |url| Uirusu::VTUrl.query_report(VTAPI, url, allinfo: 1) }
+      obj['ITW_urls'].map do |url|
+        begin
+          domain = URI.parse(URI.encode(url)).host
+          res = {
+            'hostname' => domain
+          }
+          if args['pivot']
+            res.merge! Uirusu::VTUrl.query_report(VTAPI, domain)
+          end
+          res
+        rescue URI::InvalidURIError => e
+          STDERR.puts e
+        end
+      end
+    }
+  end
+
+  field :urls, types[Types::VTUrlType] do
+    argument :pivot, types.Boolean, default_value: false
+    description "Pivoted URLs"
+    resolve ->(obj, args, ctx) {
+      obj['ITW_urls'].map do |url|
+        res = {
+          'url' => url
+        }
+        if args['pivot']
+          Uirusu::VTUrl.query_report(VTAPI, url, allinfo: 1)
+        end
+        res
+      end
     }
   end
 
   field :raw, types.String do
+    description "Response as raw JSON"
     resolve ->(obj, args, ctx) {
-      obj
+      obj.to_json
     }
   end
 end
